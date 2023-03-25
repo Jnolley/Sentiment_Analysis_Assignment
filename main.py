@@ -1,25 +1,30 @@
+import numpy as np
 import tensorflow as tf
-import model
-import util
+import tensorflow_datasets as tfds
+from model import create_sequential_model
+from util import prepare_datasets
 
-def main():
-    # Load the data
-    train_data, val_data, test_data = util.load_data()
+# Load dataset and create the train and validation splits
+train_datasets, val_datasets, test_dataset = prepare_datasets()
 
-    # Create the model
-    sentiment_model = model.create_model()
+# Create the model
+sequential_model = create_sequential_model()
+sequential_model.summary()
 
+# Train and evaluate the model
+accs = []
+
+for i in range(len(train_datasets)):
     # Compile the model
-    sentiment_model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+    sequential_model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
 
-    # Train the model
-    history = sentiment_model.fit(train_data, epochs=10, validation_data=val_data, callbacks=[util.early_stopping_callback()])
+    # Train the model with early stopping
+    epochs = 500
+    history = sequential_model.fit(train_datasets[i], epochs=epochs, validation_data=val_datasets[i], callbacks=[tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=1, restore_best_weights=True)])
 
     # Evaluate the model
-    test_loss, test_acc = sentiment_model.evaluate(test_data)
+    _, accuracy = sequential_model.evaluate(test_dataset)
+    print(f'Test accuracy: {accuracy:.4f}')
+    accs.append(accuracy)
 
-    print(f'Test Loss: {test_loss}, Test Accuracy: {test_acc}')
-
-if __name__ == "__main__":
-    main()
-
+print(f"Average validation accuracy across {len(train_datasets)} folds (model1): {np.mean(accs)}")

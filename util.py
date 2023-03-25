@@ -1,20 +1,23 @@
 import tensorflow as tf
 import tensorflow_datasets as tfds
 
-def load_data():
-    # Load IMDB dataset
-    (train_data, test_data), info = tfds.load('imdb_reviews', split=['train', 'test'], with_info=True, as_supervised=True)
+_, info = tfds.load('imdb_reviews/subwords8k', with_info=True, as_supervised=True)
+encoder = info.features['text'].encoder
 
-    # Preprocess the data
-    # Implement your preprocessing steps here
+BATCH_SIZE = 64
+BUFFER_SIZE = 10000
+padded_shapes = ([None], ())
 
-    # Split the train_data into train_data and val_data
-    train_data = train_data.shuffle(25000)
-    val_data = train_data.take(5000)
-    train_data = train_data.skip(5000)
+def prepare_datasets():
+    val_splits = [f'train[{k}%:{k+10}%]' for k in range(0, 100, 10)]
+    train_splits = [f'train[:{k}%]+train[{k+10}%:]' for k in range(0, 100, 10)]
 
-    return train_data, val_data, test_data
+    train_datasets = [tfds.load('imdb_reviews/subwords8k', split=s, as_supervised=True) for s in train_splits]
+    val_datasets = [tfds.load('imdb_reviews/subwords8k', split=s, as_supervised=True) for s in val_splits]
+    test_dataset = tfds.load('imdb_reviews/subwords8k', split='test', as_supervised=True)
 
-def early_stopping_callback():
-    return tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=5)
-
+    padded_train_datasets = [ds.shuffle(BUFFER_SIZE).padded_batch(BATCH_SIZE, padded_shapes) for ds in train_datasets]
+    padded_val_datasets = [ds.shuffle(BUFFER_SIZE).padded_batch(BATCH_SIZE, padded_shapes) for ds in val_datasets]
+    test_dataset_padded = test_dataset.shuffle(BUFFER_SIZE).padded_batch(BATCH_SIZE, padded_shapes)
+    
+    return padded_train_datasets, padded_val_datasets, test_dataset_padded
