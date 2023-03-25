@@ -15,7 +15,7 @@ class Attention(tf.keras.layers.Layer):
         a = tf.nn.softmax(q, axis=1)
         return tf.reduce_sum(inputs * a, axis=1)
 
-def create_sequential_model(embed_dim=128, lstm_units=64):
+def create_lstm_model(embed_dim=128, lstm_units=64):
     model = tf.keras.Sequential([
         tf.keras.layers.Input(shape=(None,)),
         tf.keras.layers.Embedding(encoder.vocab_size, embed_dim),
@@ -26,3 +26,18 @@ def create_sequential_model(embed_dim=128, lstm_units=64):
     ])
 
     return model
+
+def create_drop_model(embed_dim=128, lstm_units=128):
+    model = tf.keras.Sequential([
+        tf.keras.layers.Input(shape=(None,)),
+        tf.keras.layers.Embedding(encoder.vocab_size, embed_dim),
+        tf.keras.layers.LSTM(lstm_units, return_sequences=True),
+        Attention(),
+        tf.keras.layers.Dropout(.5),
+        tf.keras.layers.Dense(64, activation='relu'),
+        tf.keras.layers.Dense(1, activation='sigmoid')
+    ])
+
+    return model
+
+
