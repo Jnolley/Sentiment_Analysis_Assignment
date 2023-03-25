@@ -31,7 +31,7 @@ def create_drop_model(embed_dim=128, lstm_units=128):
     model = tf.keras.Sequential([
         tf.keras.layers.Input(shape=(None,)),
         tf.keras.layers.Embedding(encoder.vocab_size, embed_dim),
-        tf.keras.layers.LSTM(lstm_units, return_sequences=True),
+        tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(lstm_units, return_sequences=True)),
         Attention(),
         tf.keras.layers.Dropout(.5),
         tf.keras.layers.Dense(64, activation='relu'),

@@ -24,8 +24,8 @@ for i in range(len(train_datasets)):
 
     # Train the model with early stopping
     epochs = 500
-    history = lstm_model.fit(train_datasets[i], epochs=epochs, validation_data=val_datasets[i], callbacks=[tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=1, restore_best_weights=True)])
-    history = drop_model.fit(train_datasets[i], epochs=epochs, validation_data=val_datasets[i], callbacks=[tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=1, restore_best_weights=True)])
+    history = lstm_model.fit(train_datasets[i], epochs=epochs, validation_data=val_datasets[i], callbacks=[tf.keras.callbacks.EarlyStopping(monitor='val_accuracy', patience=5, restore_best_weights=True)])
+    history = drop_model.fit(train_datasets[i], epochs=epochs, validation_data=val_datasets[i], callbacks=[tf.keras.callbacks.EarlyStopping(monitor='val_accuracy', patience=5, restore_best_weights=True)])
 
     # Evaluate the model
     _, accuracy = lstm_model.evaluate(test_dataset)
@@ -36,5 +36,9 @@ for i in range(len(train_datasets)):
     print(f'Test accuracy: {accuracy:.4f}')
     accs2.append(accuracy2)
 
-print(f"Average validation accuracy across {len(train_datasets)} folds (LSTM-based): {np.mean(accs)}")
-print(f"Average validation accuracy across {len(train_datasets)} folds (GRU-based): {np.mean(accs)}")
+print(f"Average validation accuracy across {len(train_datasets)} folds (basic lstm): {np.mean(accs)}")
+print(accs)
+
+
+print(f"Average validation accuracy across {len(train_datasets)} folds (bidirectional lstm): {np.mean(accs2)}")
+print(accs2)
