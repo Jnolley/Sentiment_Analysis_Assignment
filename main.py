@@ -33,7 +33,7 @@ for i in range(len(train_datasets)):
     accs.append(accuracy)
     
     _, accuracy2 = drop_model.evaluate(test_dataset)
-    print(f'Test accuracy: {accuracy:.4f}')
+    print(f'Test accuracy: {accuracy2:.4f}')
     accs2.append(accuracy2)
 
 print(f"Average validation accuracy across {len(train_datasets)} folds (basic lstm): {np.mean(accs)}")
